@@ -12,9 +12,11 @@ import java.util.List;
 
 @Repository
 public class UserDaoImp implements UserDao {
-
+   private final SessionFactory sessionFactory;
    @Autowired
-   private SessionFactory sessionFactory;
+   public UserDaoImp(SessionFactory sessionFactory) {
+      this.sessionFactory = sessionFactory;
+   }
 
    @Override
    public void add(User user) {
@@ -23,26 +25,20 @@ public class UserDaoImp implements UserDao {
 
    @Override
    public void addUserWithCar(User user, Car car) {
-      sessionFactory.getCurrentSession().save(car);
+      user.setCar(car);
       sessionFactory.getCurrentSession().save(user);
+
    }
 
    @Override
    public User getUserByCar(String model, int series) {
-      String hql = "Select user from User user join user.car car where car.model = (:carmodel) and car.series = (:carseries)";
+      String hql = "Select user from User user join user.car car where car.model = (:carModel) and car.series = (:carSeries)";
       Query query = sessionFactory.getCurrentSession().createQuery(hql);
-      query.setParameter("carmodel", model);
-      query.setParameter("carseries", series);
-      List<User> users = query.getResultList();
+      query.setParameter("carModel", model);
+      query.setParameter("carSeries", series);
 
-
-      if (users.isEmpty()) {
-         return null;
-      } else {
-         return users.get(0);
-      }
+      return (User) query.getSingleResult();
    }
-
 
    @Override
    @SuppressWarnings("unchecked")
